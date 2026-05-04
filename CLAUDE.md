@@ -1,7 +1,7 @@
 # nyuchi learning - Development & Design Guidelines
 
-**Version**: 5.4 (Updated Codebase Inventory & shadcn/ui Documentation)
-**Last Updated**: February 2026
+**Version**: 5.5 (Expanded Test Suite Documentation & CI Pipeline Sync)
+**Last Updated**: May 2026
 **Maintained By**: nyuchi learning Development Team
 
 ---
@@ -201,9 +201,17 @@ This project follows a **clean minimalist design philosophy** inspired by Anthro
 │   ├── styles/
 │   │   └── global.css          # Tailwind theme, design tokens, component layer
 │   └── env.d.ts                # TypeScript environment definitions
-├── tests/                      # Test suites
-│   ├── design-guidelines.test.js    # Design system compliance tests
-│   └── accessibility-seo.test.js    # Accessibility & SEO tests (requires build)
+├── tests/                      # Test suites (Vitest, ~1,300 tests across 10 files)
+│   ├── design-guidelines.test.js    # Design system compliance (source)
+│   ├── color-contrast.test.js       # WCAG 2.2 AAA + APCA Lc compliance (source)
+│   ├── theme-system.test.js         # Theme tokens, light/dark/system (source)
+│   ├── components.test.js           # Component structure & semantic typography (source)
+│   ├── accessibility-seo.test.js    # A11y on built HTML (requires build)
+│   ├── seo-schemas.test.js          # JSON-LD, OG, Twitter, meta validation (build)
+│   ├── security.test.js             # Headers, CSP, dependency surface (build)
+│   ├── performance.test.js          # Performance budgets & build output (build)
+│   ├── content-quality.test.js      # Content & link validation (build)
+│   └── infrastructure.test.js       # Resilience, sitemap, robots (build)
 ├── .github/
 │   └── workflows/
 │       └── ci.yml              # CI pipeline (lint, format, test, build)
@@ -225,6 +233,7 @@ This project follows a **clean minimalist design philosophy** inspired by Anthro
 ├── DEPLOYMENT.md               # Deployment instructions
 ├── README.md                   # Project documentation
 ├── SECURITY.md                 # Security policy
+├── TODO.md                     # Resources hub & help page backlog
 └── LICENSE                     # MIT License
 ```
 
@@ -1231,16 +1240,46 @@ npm run preview      # Preview production build locally
 
 ### Testing
 
+The suite has expanded to ~1,300 tests across 10 files. Tests split into two groups: **source tests** (run against `src/`, no build needed) and **build tests** (run against `dist/`, require `npm run build` first).
+
 ```bash
-npm test             # Run all tests (design guidelines + accessibility/SEO)
-npm run test:design  # Run design guidelines compliance tests only
-npm run test:a11y    # Run accessibility & SEO tests only (requires build first)
-npm run test:watch   # Run tests in watch mode during development
+npm test               # Run all tests (vitest run)
+npm run test:watch     # Watch mode during development
+
+# Source tests (no build required)
+npm run test:source    # design + colors + theme + components
+npm run test:design    # Design guidelines compliance
+npm run test:colors    # WCAG 2.2 AAA + APCA Lc contrast validation
+npm run test:theme     # Theme system tokens, light/dark/system
+npm run test:components # Component structure & semantic typography
+
+# Build tests (run npm run build first)
+npm run test:build     # a11y + seo + security + perf + content + infra
+npm run test:a11y      # Accessibility validation on built HTML
+npm run test:seo       # JSON-LD schemas, OG, Twitter, meta validation
+npm run test:security  # Security headers, CSP, dependency surface
+npm run test:performance # Performance budgets & build output size
+npm run test:content   # Content quality & link validation
+npm run test:infra     # Sitemap, robots.txt, RSS, resilience
 ```
 
 **Test suites:**
-- `tests/design-guidelines.test.js` - Validates source files against CLAUDE.md design rules: breadcrumbs, no background images, no emojis, heading hierarchy, display font usage, no forbidden fonts, BaseLayout usage, typography tokens
-- `tests/accessibility-seo.test.js` - Validates built HTML output: meta tags, Open Graph, JSON-LD, skip links, landmarks, lang attribute, heading hierarchy, viewport meta, CSS accessibility features, BaseLayout features, sitemap, RSS
+- `tests/design-guidelines.test.js` — Source. Breadcrumbs, no background images, no emojis, heading hierarchy, display font usage, no forbidden fonts, BaseLayout usage, semantic typography tokens
+- `tests/color-contrast.test.js` — Source. APCA Lc (60+ body, 75+ preferred) and WCAG 2.x ratios across all five-mineral palette combinations in light and dark themes
+- `tests/theme-system.test.js` — Source. Validates `--text`/`--bg`/`--border` tokens, `.light`/`.dark` class application, ThemeToggle wiring, localStorage persistence
+- `tests/components.test.js` — Source. Component existence, semantic typography compliance (no hardcoded `text-sm`/`text-base`/`text-lg`), reusable component patterns
+- `tests/accessibility-seo.test.js` — Build. Meta tags, Open Graph, JSON-LD, skip links, landmarks, lang attribute, heading hierarchy, viewport meta, CSS accessibility features, sitemap, RSS
+- `tests/seo-schemas.test.js` — Build. Deep JSON-LD validation: `EducationalOrganization`, `LearningResource`, `Article`, `BreadcrumbList`, `WebSite` schemas
+- `tests/security.test.js` — Build. Security headers, Content Security Policy, exposure surface
+- `tests/performance.test.js` — Build. Performance budgets, output bundle size, asset weight
+- `tests/content-quality.test.js` — Build. Internal link validation, content quality heuristics
+- `tests/infrastructure.test.js` — Build. Sitemap completeness, robots.txt directives, RSS feed validity, resilience checks
+
+**Run the full local CI gate** (lint + format + source tests + build + build tests):
+
+```bash
+npm run check
+```
 
 ### Linting & Formatting
 
@@ -1261,10 +1300,23 @@ npm run check        # Run build + tests + lint (full CI check locally)
 
 ### CI/CD (GitHub Actions)
 
-The `.github/workflows/ci.yml` workflow runs on every push to `main` and on pull requests:
+The `.github/workflows/ci.yml` workflow runs on every push to `main` and on pull requests, with two jobs:
 
-1. **Lint & Format** job (runs first): ESLint, Prettier check, design guidelines tests
-2. **Build & Test** job (runs after lint passes): TypeScript check, `astro build`, accessibility/SEO tests
+1. **Lint & Format** (Node 18, runs first):
+   - ESLint on `src/`
+   - Prettier `--check`
+   - Source tests: design guidelines, color contrast, theme system, components
+
+2. **Build & Test** (Node 18, depends on Lint):
+   - `astro check` (TypeScript)
+   - `astro build`
+   - Accessibility & SEO tests (`accessibility-seo.test.js` + `seo-schemas.test.js`)
+   - Security tests (`security.test.js`)
+   - Performance & build output tests (`performance.test.js`)
+   - Content quality & link validation (`content-quality.test.js`)
+   - Infrastructure & resilience tests (`infrastructure.test.js`)
+
+Each test stage runs as a separate step so a failure surfaces with a precise label. Match this layering when adding tests: source tests in lint job, build-output tests in build job.
 
 ### Development Best Practices
 
