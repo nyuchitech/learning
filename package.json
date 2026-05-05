@@ -9,8 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier --write \"src/**/*.{svelte,ts,js,css}\" \"tests/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.{svelte,ts,js,css}\" \"tests/**/*.ts\"",
+    "format": "prettier --plugin prettier-plugin-svelte --write \"src/**/*.{svelte,ts,js,css}\" \"tests/**/*.ts\"",
+    "format:check": "prettier --plugin prettier-plugin-svelte --check \"src/**/*.{svelte,ts,js,css}\" \"tests/**/*.ts\"",
     "test": "vitest run"
   },
   "devDependencies": {

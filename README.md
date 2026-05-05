@@ -26,11 +26,11 @@ In [bundu-labs/marketing#5](https://github.com/bundu-labs/marketing/pull/5)
 the content was migrated into the marketing monorepo and split across
 three surfaces:
 
-| Surface          | URL                                                                    | Audience              | Mineral    |
-| ---------------- | ---------------------------------------------------------------------- | --------------------- | ---------- |
-| Bundu Education  | [bundu.org/education](https://bundu.org/education)                     | Open frameworks       | malachite  |
-| Nyuchi Learning  | [nyuchi.com/learning](https://nyuchi.com/learning)                     | Commercial training   | gold       |
-| Mukoko Lingo     | [mukoko.com/lingo](https://mukoko.com/lingo)                           | Consumer language app | tanzanite  |
+| Surface         | URL                                                | Audience              | Mineral   |
+| --------------- | -------------------------------------------------- | --------------------- | --------- |
+| Bundu Education | [bundu.org/education](https://bundu.org/education) | Open frameworks       | malachite |
+| Nyuchi Learning | [nyuchi.com/learning](https://nyuchi.com/learning) | Commercial training   | gold      |
+| Mukoko Lingo    | [mukoko.com/lingo](https://mukoko.com/lingo)       | Consumer language app | tanzanite |
 
 This repo now ships a single one-pager that:
 
@@ -48,7 +48,7 @@ canonical "education" colour in the marketing monorepo's data.
 ## Stack
 
 - **SvelteKit 2** + **Svelte 5** runes (`$props`, snippets via `{@render}`)
-- **Vite 6**
+- **Vite 8**
 - **Tailwind 3** with the design tokens copied verbatim from
   `apps/nyuchi/src/styles/global.css` (the marketing monorepo)
 - **`@sveltejs/adapter-vercel`** for deployment
@@ -105,7 +105,3 @@ Two reasons:
    redirect (e.g. a sign-in page that routes alumni to the right
    surface, or a search form that types into all three at once), the
    scaffolding is already in place.
-
-## License
-
-[MIT](./LICENSE) — same as the rest of the Nyuchi web stack.

@@ -21,7 +21,7 @@ Out of scope:
 
 ## Reporting a vulnerability
 
-Email **security@nyuchi.com**. Include the URL, a reproduction, and the
+Email <security@nyuchi.com>. Include the URL, a reproduction, and the
 impact you observed. Initial acknowledgement within 48 hours.
 
 Do not file public GitHub issues for security reports.
